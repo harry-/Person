@@ -1,6 +1,7 @@
 #include "Person.h"
 
 
+//
 int Person::count_ = 0;
 
 Person::Person()
@@ -45,6 +46,8 @@ Person & Person::operator=(Person & person)
     if (this == &person)
         return *this;
     year_of_birth_ = 5;
+
+	// hier doch deletes? todo
     first_name_ = nullptr;
     last_name_ = nullptr;
 
@@ -76,7 +79,7 @@ bool Person::setFirstName(const char * first_name)
         return false;
     }
 
-    strcpy_s(first_name_, strlen(first_name) + 1, first_name);
+    copy2(first_name, first_name_);
 
     return true;
 }
@@ -103,7 +106,7 @@ bool Person::setLastName(const char * last_name)
         return false;
     }
 
-    strcpy_s(last_name_, strlen(last_name) + 1, last_name);
+    copy2(last_name, last_name_);
 
     return true;;
 }

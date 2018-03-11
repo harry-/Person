@@ -1,2 +1,6 @@
 *vcxproj*
 *debug*
+*~
+main.s
+*.gch
+*.swp

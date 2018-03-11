@@ -4,6 +4,8 @@
 #include <string>
 #include <cstdio>
 #include <sstream>
+#include <cstring>
+#include "copy.h"
 
 class Person
 {
@@ -13,7 +15,10 @@ public:
 
     Person(const char* first_name, const char* last_name, int year);
     Person(Person& person);
-    Person& Person::operator=(Person& person);
+    Person& operator=(Person& person);
+
+	Person(Person&&) = delete; // Verschiebekonstruktor nicht implementiert
+	Person& operator=(Person&&) = delete; // Verschiebezuweisung nicht implementiert
 
     bool setFirstName(const char* first_name);
     bool setLastName(const char* last_name);
