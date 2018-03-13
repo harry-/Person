@@ -15,6 +15,11 @@ bool displayAgeCohort(Person *persons);
 
 void messageContinue(const std::string message);
 void messageContinue();
+bool errorMessage(std::string message);
+void clearCin();
+
+int customStrCmp(char * s1, char *s2);
+bool displayLastName(Person * persons);
 
 namespace {
     /*------casted umlaute in der konsole direkt um :))------*/
@@ -31,6 +36,7 @@ namespace {
     const char* kOffset= "\n\t\t\t";
 	const char* kOffsetOnly = "\t\t\t";
     const std::int32_t cIntMax = std::numeric_limits<std::int32_t>::max();
+	const int kMaxLength = 50;
 }
 
 int main()
@@ -43,7 +49,9 @@ int main()
 
     person = person3;
 
-    //Person* ppersons[kMaxObjects];
+	
+	
+	//Person* ppersons[kMaxObjects];
     Person persons[kMaxObjects];
     //Person ** persons3;
     //for (size_t i = 0; i < kMaxObjects; i++)
@@ -307,50 +315,40 @@ bool menu(Person * persons)
 bool insertPerson(Person* persons)
 {
     std::string firstName;
-    std::string lastName;
+    char lastName[kMaxLength];
     int year_of_birth;
     
+	system("cls");
+
     if (!(persons->getCount() < kMaxObjects))
     {
         std::cout << kOffset << "Keine freien Datens" << ae << "tze";
         return false;
     }
 
-    std::cout << kOffset << "Vorname eingeben:";
+    std::cout << kOffset << "Vorname eingeben: ";
     std::cin >> firstName;
 
-    if (!std::cin)
-    {
-        std::cout << kOffset << "Ung"<<ue<<"ltige Eingabe";
-        std::cin.clear();
-        std::cin.ignore(cIntMax, '\n');
-        return false;
-    }
+	if (!std::cin)
+		return errorMessage("Ungueltige Eingabe");
+
+	clearCin();
+
+
     std::cout << kOffsetOnly << "Nachname eingeben: ";
-    std::cin >> lastName;
-    if (!std::cin)
-    {
-        std::cout << kOffset << "Ung"<<ue<<"ltige Eingabe";
-        std::cin.clear();
-        std::cin.ignore(cIntMax, '\n');
-        return false;
-    }
+    std::cin.getline(lastName, kMaxLength);
+	if (!std::cin)
+		return errorMessage("Ungueltige Eingabe");
+
     std::cout << kOffsetOnly << "Geburtsjahr eingeben: ";
     std::cin >> year_of_birth;
-    if (std::cin.fail())
-    {
-        std::cout << kOffset << "Ung"<<ue<<"ltige Eingabe";
-        //std::cin.seekg(0, std::ios::end);
-        std::cin.clear();
-        std::cin.ignore(cIntMax, '\n');
-        //std::cin.clear();
-        //std::cin.ignore('\n');
-        return false;
-    }
-    Person person(firstName.c_str(), lastName.c_str(), year_of_birth);
+	if (std::cin.fail())
+		return errorMessage("Ungueltige Eingabe");
+
+    Person person(firstName.c_str(), lastName, year_of_birth);
 
     persons[person.getCount()].setFirstName(firstName.c_str());
-    persons[person.getCount()].setLastName(lastName.c_str());
+    persons[person.getCount()].setLastName(lastName);
     persons[person.getCount()].setYearOfBirth(year_of_birth);
 
     person.raiseCount();
@@ -360,7 +358,9 @@ bool displayPersons(Person * persons)
 {
 	if (!persons->getCount())
 		return false;
-	
+
+	system("cls");
+
 	for (int  i = 0; i < persons[0].getCount(); i++)
     {
 		std::cout << '\n' << kOffsetOnly;
@@ -378,7 +378,8 @@ bool subMenu(Person * persons)
 		kOffset << "Ausgabemen" << ue <<
 		kOffset << "1.) Alle ausgeben" <<
 		kOffset << "2.) Jahrgang ausgeben" <<
-		kOffset << "3.) Zur" << ue << "ck" <<
+		kOffset << "3.) Personen mit gleichen Nachnamen ausgeben" <<
+		kOffset << "4.) Zur" << ue << "ck" <<
 		kOffset << "Auswahl: ";
 
         char input;
@@ -395,7 +396,12 @@ bool subMenu(Person * persons)
                 std::cout << kOffset << "Keine Daten vorhanden";
 			messageContinue();
             break;
-        case '3': 
+		case '3':
+			if (!displayLastName(persons))
+				std::cout << kOffset << "Keine Daten vorhanden";
+			messageContinue();
+			break;
+        case '4': 
 			system("cls");
 			return true;
         default: std::cout << kOffset << "Ung"<<ue<<"ltige Eingabe";
@@ -406,15 +412,13 @@ bool subMenu(Person * persons)
 bool displayAgeCohort(Person * persons)
 {
     int input;
+	system("cls");
     std::cout << kOffset << "Jahrgang: ";
     std::cin >> input;
-    if (std::cin.fail())
-    {
-        std::cout << kOffset << "Ung"<<ue<<"ltige Eingabe";
-        std::cin.clear();
-        std::cin.ignore(cIntMax, '\n');
-        return false;
-    }
+	if (std::cin.fail())
+		return errorMessage("Ungueltige Eingabe");
+		
+    
 	bool found_at_least_one = false;
 	for (int i = 0; i < persons[0].getCount(); i++)
 	{
@@ -425,4 +429,58 @@ bool displayAgeCohort(Person * persons)
 		found_at_least_one = true;
 	}
 	return found_at_least_one;
+}
+
+/* Fehlermeldung, Buffer leeren, immer false zurueckgeben (wird durchgereicht) */
+
+bool errorMessage(std::string message)
+{
+	std::cout << kOffset << message;
+	clearCin();
+	return false;
+}
+
+/* den Einlesebuffer zuruecksetzen */
+
+void clearCin()
+{
+	std::cin.clear();
+	std::cin.ignore(cIntMax, '\n');
+}
+
+bool displayLastName(Person * persons)
+{
+	char input[50];
+	system("cls");
+	clearCin();
+	std::cout << kOffset << "Nachname: ";
+	std::cin.getline(input, kMaxLength);
+	if (std::cin.fail())
+		return errorMessage("Ungueltige Eingabe");
+
+
+	bool found_at_least_one = false;
+	for (int i = 0; i < persons[0].getCount(); i++)
+	{
+		if (customStrCmp(persons[i].getLastName(),input))
+			continue;
+		std::cout << '\n' << kOffsetOnly;
+		persons[i].display();
+		found_at_least_one = true;
+	}
+
+	return found_at_least_one;
+}
+
+int customStrCmp(char * s1, char *s2)
+{
+	for (int i = 0;; ++i)
+	{
+		if (s1[i] < s2[i]) 
+			return -1;
+		else if (s1[i] > s2[i]) 
+			return 1;
+		if (!s1[i]) 
+			return 0;
+	}
 }

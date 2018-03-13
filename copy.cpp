@@ -1,5 +1,7 @@
 #include "copy.h"
 
+/* "sichere" Kopierfunktionen */
+
 void copy2(const char* from, char* to)
 {
 #ifdef msvs
